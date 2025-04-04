@@ -9,6 +9,7 @@ import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
+import com.example.carpoolingapp.R;
 
 import com.example.carpoolingapp.databinding.ActivityRideResultPageBinding;
 
