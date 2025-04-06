@@ -1,36 +1,36 @@
 [
   {
-    "destination": "Hidden Leaf Village",
+    "destination": "Downtown Kelowna",
     "price": 1500,
-    "driver": "Naruto Uzumaki",
+    "driver": "Liam Johnson",
     "date": "2025-04-10",
     "time": "08:30"
   },
   {
-    "destination": "Ramen Ichiraku",
+    "destination": "Okanagan College",
     "price": 200,
-    "driver": "Kakashi Hatake",
+    "driver": "Aiden Clarke",
     "date": "2025-04-11",
     "time": "12:00"
   },
   {
-    "destination": "Suna Desert",
+    "destination": "Kelowna Waterfront Park",
     "price": 3200,
-    "driver": "Gaara",
+    "driver": "Noah Thompson",
     "date": "2025-04-12",
     "time": "14:45"
   },
   {
-    "destination": "Hidden Rain Village",
+    "destination": "Mission Creek Park",
     "price": 800,
     "driver": "Roronoa Zoro",
     "date": "2025-04-13",
     "time": "09:15"
   },
   {
-    "destination": "Uchiha District",
+    "destination": "UBC Okanagan",
     "price": 1000,
-    "driver": "Sasuke Uchiha",
+    "driver": "Lucas Anderson",
     "date": "2025-04-14",
     "time": "17:20"
   }
