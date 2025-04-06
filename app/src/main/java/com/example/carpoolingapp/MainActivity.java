@@ -52,12 +52,6 @@ public class MainActivity extends AppCompatActivity {
                     startActivity(intent);
                 }
                 return true;
-            }else if (item.getItemId() == R.id.nav_history) {
-                if (!(getClass().equals(TripHistoryActivity.class))) {
-                    Intent intent = new Intent(MainActivity.this, TripHistoryActivity.class);
-                    startActivity(intent);
-                }
-                return true;
             }
 
             return false;
