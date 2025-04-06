@@ -1,0 +1,43 @@
+{
+  "Naruto Uzumaki": {
+    "ratings": [5, 5, 4],
+    "comments": [
+      "Energetic and on time, yelled 'Believe it!' the whole way.",
+      "Blasted music but got me there fast.",
+      "Talked non-stop about being Hokage, but solid driving."
+    ],
+    "reportCount": 0
+  },
+  "Kakashi Hatake": {
+    "ratings": [5, 4, 5],
+    "comments": [
+      "Cool and calm ride, even gave book recommendations.",
+      "Took a detour to finish his chapter, but no complaints.",
+      "Smoothest ride ever. 10/10."
+    ],
+    "reportCount": 0
+  },
+  "Gaara": {
+    "ratings": [4, 5],
+    "comments": [
+      "The car was full of sand but ride was chill.",
+      "Silent driver but efficient. Arrived early."
+    ],
+    "reportCount": 0
+  },
+  "Roronoa Zoro": {
+    "ratings": [1],
+    "comments": [
+      "Was supposed to go to Hidden Rain Village... ended up at sea."
+    ],
+    "reportCount": 1
+  },
+  "Sasuke Uchiha": {
+    "ratings": [5, 3],
+    "comments": [
+      "Moody but punctual.",
+      "Kept glaring through the mirror... slightly intimidating."
+    ],
+    "reportCount": 0
+  }
+}
