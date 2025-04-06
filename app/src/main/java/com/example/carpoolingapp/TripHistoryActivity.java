@@ -5,15 +5,9 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
 
-import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
-import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -24,7 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
-public class SettingPage extends AppCompatActivity {
+public class TripHistoryActivity extends AppCompatActivity {
 
     private RecyclerView tripRecyclerView;
     private TripHistoryAdapter adapter;
@@ -34,46 +28,20 @@ public class SettingPage extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_setting_page); // reuse the layout file
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
+        setContentView(R.layout.activity_trip_history);
 
-        // Set up RecyclerView and message
         tripRecyclerView = findViewById(R.id.tripRecyclerView);
         emptyTextView = findViewById(R.id.emptyTextView);
+
         tripRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         adapter = new TripHistoryAdapter(tripList, trip -> {
-            Intent intent = new Intent(SettingPage.this, TripDetailActivity.class);
-            intent.putExtra("trip", trip);
+            Intent intent = new Intent(TripHistoryActivity.this, TripDetailActivity.class);
+            intent.putExtra("trip", trip); // ✅ Trip now implements Serializable
             startActivity(intent);
         });
         tripRecyclerView.setAdapter(adapter);
 
         loadTripsFromJson();
-
-        // Bottom nav
-        BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
-        bottomNavigationView.setOnNavigationItemSelectedListener(item -> {
-            if (item.getItemId() == R.id.nav_home) {
-                if (!(getClass().equals(MainActivity.class))) {
-                    startActivity(new Intent(this, MainActivity.class));
-                }
-                return true;
-            } else if (item.getItemId() == R.id.nav_chat) {
-                if (!(getClass().equals(MessagePage.class))) {
-                    startActivity(new Intent(this, MessagePage.class));
-                }
-                return true;
-            } else if (item.getItemId() == R.id.nav_settings) {
-                // We're already here (Settings is now Trip History)
-                return true;
-            }
-            return false;
-        });
     }
 
     private void loadTripsFromJson() {
