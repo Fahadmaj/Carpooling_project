@@ -14,11 +14,9 @@
         android:padding="16dp">
 
         <TextView
-            android:id="@+id/destinationText"
-            android:layout_width="wrap_content"
+            android:id="@+id/driverText"  android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Destination"
-            android:textStyle="bold"
+            android:text="Driver: Monkey D. Luffy"  android:textStyle="bold"
             android:textSize="18sp" />
 
         <TextView
@@ -29,11 +27,9 @@
             android:textSize="16sp" />
 
         <TextView
-            android:id="@+id/driverText"
-            android:layout_width="wrap_content"
+            android:id="@+id/destinationText"  android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Driver: Monkey D. Luffy"
-            android:textSize="16sp" />
+            android:text="Destination"  android:textSize="16sp" />
 
         <TextView
             android:id="@+id/dateText"

@@ -1,3 +1,4 @@
+// SettingPage.java
 package com.example.carpoolingapp;
 
 import android.content.Intent;
@@ -30,19 +31,21 @@ public class SettingPage extends AppCompatActivity {
     private TripHistoryAdapter adapter;
     private TextView emptyTextView;
     private List<Trip> tripList = new ArrayList<>();
+    private String acceptedDriver;
+    private String selectedDate;
+    private String selectedTime;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_setting_page); // reuse the layout file
+        setContentView(R.layout.activity_setting_page);
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
 
-        // Set up RecyclerView and message
         tripRecyclerView = findViewById(R.id.tripRecyclerView);
         emptyTextView = findViewById(R.id.emptyTextView);
         tripRecyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -53,9 +56,12 @@ public class SettingPage extends AppCompatActivity {
         });
         tripRecyclerView.setAdapter(adapter);
 
-        loadTripsFromJson();
+        acceptedDriver = getIntent().getStringExtra("acceptedDriver");
+        selectedDate = getIntent().getStringExtra("selectedDate");
+        selectedTime = getIntent().getStringExtra("selectedTime");
 
-        // Bottom nav
+        loadAcceptedTripFromJson();
+
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
         bottomNavigationView.setOnNavigationItemSelectedListener(item -> {
             if (item.getItemId() == R.id.nav_home) {
@@ -69,16 +75,15 @@ public class SettingPage extends AppCompatActivity {
                 }
                 return true;
             } else if (item.getItemId() == R.id.nav_settings) {
-                // We're already here (Settings is now Trip History)
                 return true;
             }
             return false;
         });
     }
 
-    private void loadTripsFromJson() {
+    private void loadAcceptedTripFromJson() {
         try {
-            InputStream is = getResources().openRawResource(R.raw.trips);
+            InputStream is = getResources().openRawResource(R.raw.rides);
             Scanner scanner = new Scanner(is).useDelimiter("\\A");
             String json = scanner.hasNext() ? scanner.next() : "";
             scanner.close();
@@ -86,14 +91,17 @@ public class SettingPage extends AppCompatActivity {
             JSONArray tripArray = new JSONArray(json);
             for (int i = 0; i < tripArray.length(); i++) {
                 JSONObject obj = tripArray.getJSONObject(i);
-                Trip trip = new Trip(
-                        obj.getString("destination"),
-                        obj.getDouble("price"),
-                        obj.getString("driver"),
-                        obj.getString("date"),
-                        obj.getString("time")
-                );
-                tripList.add(trip);
+                if (obj.getString("driverName").equals(acceptedDriver)) {
+                    Trip trip = new Trip(
+                            obj.getString("destination"),
+                            Double.parseDouble(obj.getString("price").replace("$", "")),
+                            obj.getString("driverName"),
+                            selectedDate,
+                            selectedTime
+                    );
+                    tripList.add(trip);
+                    break;
+                }
             }
 
             if (tripList.isEmpty()) {

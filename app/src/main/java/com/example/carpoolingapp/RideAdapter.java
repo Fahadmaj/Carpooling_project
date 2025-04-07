@@ -1,3 +1,4 @@
+// RideAdapter.java
 package com.example.carpoolingapp;
 
 import android.graphics.Typeface;
@@ -22,9 +23,15 @@ public class RideAdapter extends RecyclerView.Adapter<RideAdapter.ViewHolder> {
     private final List<Ride> rideList;
     private Random random = new Random();
     private boolean hasAcceptedRide = false;
+    private OnRideAcceptedListener rideAcceptedListener;
 
-    public RideAdapter(List<Ride> rideList) {
+    public interface OnRideAcceptedListener {
+        void onRideAccepted(String driverName);
+    }
+
+    public RideAdapter(List<Ride> rideList, OnRideAcceptedListener listener) {
         this.rideList = rideList;
+        this.rideAcceptedListener = listener;
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
@@ -42,7 +49,6 @@ public class RideAdapter extends RecyclerView.Adapter<RideAdapter.ViewHolder> {
             extraDetails = itemView.findViewById(R.id.extra_details);
         }
     }
-
 
     @Override
     public RideAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -70,13 +76,11 @@ public class RideAdapter extends RecyclerView.Adapter<RideAdapter.ViewHolder> {
 
         holder.extraDetails.setVisibility(ride.isExpanded ? View.VISIBLE : View.GONE);
 
-
         updateRequestButton(holder, ride);
 
         holder.requestButton.setOnClickListener(v -> {
 
             if (ride.status.equals("none")) {
-                // User is requesting a ride
                 ride.status = "requested";
                 updateRequestButton(holder, ride);
 
@@ -89,12 +93,13 @@ public class RideAdapter extends RecyclerView.Adapter<RideAdapter.ViewHolder> {
                     if (ride.status.equals("requested")) {
                         if (accepted) {
                             ride.status = "accepted";
-
                             hasAcceptedRide = true;
                             Toast.makeText(holder.itemView.getContext(),
                                     ride.driverName + " accepted your ride request!",
                                     Toast.LENGTH_LONG).show();
-
+                            if (rideAcceptedListener != null) {
+                                rideAcceptedListener.onRideAccepted(ride.driverName);
+                            }
                             notifyDataSetChanged();
                         } else {
                             ride.status = "declined";
@@ -106,7 +111,6 @@ public class RideAdapter extends RecyclerView.Adapter<RideAdapter.ViewHolder> {
                         notifyItemChanged(holder.getAdapterPosition());
                     }
                 }, 2000 + random.nextInt(3000));
-
             } else if (ride.status.equals("requested")) {
                 ride.status = "none";
                 updateRequestButton(holder, ride);
