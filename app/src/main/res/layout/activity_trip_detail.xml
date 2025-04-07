@@ -9,7 +9,6 @@
         android:orientation="vertical"
         android:padding="16dp">
 
-        <!-- Trip Info -->
         <TextView
             android:id="@+id/detailDestination"
             android:layout_width="wrap_content"
@@ -47,7 +46,6 @@
             android:text="Time"
             android:layout_marginBottom="16dp" />
 
-        <!-- Rating Bar -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -61,7 +59,6 @@
             android:stepSize="1"
             android:layout_marginBottom="16dp"/>
 
-        <!-- Comment -->
         <EditText
             android:id="@+id/commentEditText"
             android:layout_width="match_parent"
@@ -71,7 +68,6 @@
             android:gravity="top"
             android:layout_marginBottom="16dp"/>
 
-        <!-- Report Button -->
         <Button
             android:id="@+id/reportButton"
             android:layout_width="wrap_content"
@@ -79,12 +75,17 @@
             android:text="Report Trip (Auto 1-star)"
             android:layout_marginBottom="16dp"/>
 
-        <!-- Submit -->
         <Button
             android:id="@+id/submitReviewButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Submit Review" />
+
+        <Button
+            android:id="@+id/backButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Back" />
 
     </LinearLayout>
 </ScrollView>

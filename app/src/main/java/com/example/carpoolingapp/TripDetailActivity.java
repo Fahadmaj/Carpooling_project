@@ -1,3 +1,4 @@
+// TripDetailActivity.java
 package com.example.carpoolingapp;
 
 import android.content.Context;
@@ -22,7 +23,7 @@ public class TripDetailActivity extends AppCompatActivity {
     private TextView destinationText, priceText, driverText, dateText, timeText;
     private RatingBar ratingBar;
     private EditText commentEditText;
-    private Button submitReviewButton, reportButton;
+    private Button submitReviewButton, reportButton, backButton; // Added backButton
 
     private Trip trip;
 
@@ -40,6 +41,7 @@ public class TripDetailActivity extends AppCompatActivity {
         commentEditText = findViewById(R.id.commentEditText);
         submitReviewButton = findViewById(R.id.submitReviewButton);
         reportButton = findViewById(R.id.reportButton);
+        backButton = findViewById(R.id.backButton); // Initialize backButton
 
         trip = (Trip) getIntent().getSerializableExtra("trip");
         if (trip != null) {
@@ -53,21 +55,20 @@ public class TripDetailActivity extends AppCompatActivity {
         submitReviewButton.setOnClickListener(v -> {
             saveReview((int) ratingBar.getRating(), commentEditText.getText().toString(), false);
             Toast.makeText(this, "Review submitted!", Toast.LENGTH_SHORT).show();
-            goHome();
+            finish(); // Go back to TripHistoryActivity
         });
 
         reportButton.setOnClickListener(v -> {
             saveReview(1, "Reported for suspicious activity.", true);
             Toast.makeText(this, "Trip reported!", Toast.LENGTH_SHORT).show();
-            goHome();
+            finish(); // Go back to TripHistoryActivity
+        });
+
+        backButton.setOnClickListener(v -> {
+            finish(); // Go back to TripHistoryActivity
         });
 
         copyReviewsFileIfNeeded();
-    }
-
-    private void goHome() {
-        startActivity(new Intent(this, MainActivity.class));
-        finish();
     }
 
     private void copyReviewsFileIfNeeded() {
