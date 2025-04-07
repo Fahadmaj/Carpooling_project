@@ -127,7 +127,7 @@ public class MessagePage extends AppCompatActivity {
 
 
     private void sendMessage(String text) {
-        String sender = "User"; // todo replace with actual user information
+        String sender = "You"; // todo replace with actual user information
         Date timestamp = new Date();
 
         Message message = new Message(sender, text, timestamp);
