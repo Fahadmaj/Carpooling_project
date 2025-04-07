@@ -1,0 +1,32 @@
+[
+  {
+    "driverName": "Alice",
+    "destination": "123 Main St",
+    "price": "10.00$",
+    "seats": "4"
+  },
+  {
+    "driverName": "Bob",
+    "destination": "456 Park Ave",
+    "price": "15.00$",
+    "seats": "2"
+  },
+  {
+    "driverName": "Carol",
+    "destination": "789 Market Rd",
+    "price": "12.50$",
+    "seats": "3"
+  },
+  {
+    "driverName": "John",
+    "destination": "789 Market Rd",
+    "price": "14.00$",
+    "seats": "4"
+  },
+  {
+    "driverName": "Niko",
+    "destination": "222 Lawrence Ave",
+    "price": "15.00$",
+    "seats": "2"
+  }
+]

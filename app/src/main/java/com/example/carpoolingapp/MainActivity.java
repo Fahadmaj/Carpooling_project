@@ -14,6 +14,7 @@ import android.widget.Toast;
 
 
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.RawRes;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -27,6 +28,13 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -54,15 +62,29 @@ public class MainActivity extends AppCompatActivity {
         searchButton.setOnClickListener(v -> {
             availableRidesTitle.setVisibility(View.VISIBLE);
             rideList.setVisibility(View.VISIBLE);
-            //dummy drivers add here
-            rides.clear();
-            rides.add(new Ride("Alice", "123 Main St"));
-            rides.add(new Ride("Bob", "456 Park Ave"));
-            rides.add(new Ride("Carol", "789 Market Rd"));
-            rides.add(new Ride("John", "789 Market Rd"));
-            rides.add(new Ride("Niko", "222 Lawrence Ave"));
             Toast.makeText(this, "Searching for rides...", Toast.LENGTH_SHORT).show();
+
+            rides.clear();
+
+            try {
+                JSONArray jsonArray = new JSONArray(loadJSONFromRawResource(R.raw.rides));
+                for (int i = 0; i < jsonArray.length(); i++) {
+                    JSONObject obj = jsonArray.getJSONObject(i);
+                    Ride ride = new Ride(
+                            obj.getString("driverName"),
+                            obj.getString("destination"),
+                            obj.getString("price"),
+                            obj.getString("seats")
+                    );
+                    rides.add(ride);
+                }
+                adapter.notifyDataSetChanged();
+            } catch (JSONException e) {
+                e.printStackTrace();
+                Toast.makeText(this, "Failed to load rides", Toast.LENGTH_SHORT).show();
+            }
         });
+
         rideList = findViewById(R.id.ride_list);
         availableRidesTitle = findViewById(R.id.available_rides_title);
         adapter = new RideAdapter(rides);
@@ -155,6 +177,20 @@ public class MainActivity extends AppCompatActivity {
         timePicker.show();
     }
 
+    private String loadJSONFromRawResource(@RawRes int resourceId) {
+        String json = null;
+        try {
+            InputStream is = getResources().openRawResource(resourceId);
+            int size = is.available();
+            byte[] buffer = new byte[size];
+            is.read(buffer);
+            is.close();
+            json = new String(buffer, StandardCharsets.UTF_8);
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+        return json;
+    }
 
 
 
