@@ -1,32 +1,32 @@
 [
   {
-    "driverName": "Alice",
-    "destination": "123 Main St",
+    "driverName": "Sarah Thompson",
+    "destination": "3333 University Way, Kelowna",
     "price": "10.00$",
-    "seats": "4"
-  },
-  {
-    "driverName": "Bob",
-    "destination": "456 Park Ave",
-    "price": "15.00$",
-    "seats": "2"
-  },
-  {
-    "driverName": "Carol",
-    "destination": "789 Market Rd",
-    "price": "12.50$",
     "seats": "3"
   },
   {
-    "driverName": "John",
-    "destination": "789 Market Rd",
-    "price": "14.00$",
+    "driverName": "Daniel Kim",
+    "destination": "1050 Hollywood Rd N, Kelowna",
+    "price": "12.00$",
+    "seats": "2"
+  },
+  {
+    "driverName": "Emily Chen",
+    "destination": "1685 UBC Okanagan, Kelowna",
+    "price": "8.50$",
     "seats": "4"
   },
   {
-    "driverName": "Niko",
-    "destination": "222 Lawrence Ave",
-    "price": "15.00$",
+    "driverName": "James Patel",
+    "destination": "960 Yates Rd, Kelowna",
+    "price": "11.00$",
+    "seats": "1"
+  },
+  {
+    "driverName": "Maya Singh",
+    "destination": "945 Academy Way, Kelowna",
+    "price": "9.75$",
     "seats": "2"
   }
 ]

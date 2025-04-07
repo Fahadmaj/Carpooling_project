@@ -1,6 +1,10 @@
 package com.example.carpoolingapp;
 
+import android.graphics.Typeface;
 import android.os.Handler;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.style.StyleSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -58,7 +62,9 @@ public class RideAdapter extends RecyclerView.Adapter<RideAdapter.ViewHolder> {
         });
 
         holder.driverName.setText(ride.driverName);
-        holder.destination.setText(ride.destination);
+        SpannableString styledText = new SpannableString("Heading to: " + ride.destination);
+        styledText.setSpan(new StyleSpan(Typeface.BOLD), 0, "Heading to:".length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        holder.destination.setText(styledText);
         holder.price.setText("Price: " + ride.price);
         holder.seats.setText("Seats Available: " + ride.seats);
 
