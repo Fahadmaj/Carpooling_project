@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -23,17 +24,21 @@ public class RideAdapter extends RecyclerView.Adapter<RideAdapter.ViewHolder> {
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        public TextView driverName;
-        public TextView destination;
+        public TextView driverName, destination, price, seats;
         public Button requestButton;
+        public LinearLayout extraDetails;
 
         public ViewHolder(View itemView) {
             super(itemView);
             driverName = itemView.findViewById(R.id.driver_name);
             destination = itemView.findViewById(R.id.destination);
             requestButton = itemView.findViewById(R.id.request_button);
+            price = itemView.findViewById(R.id.price);
+            seats = itemView.findViewById(R.id.seats);
+            extraDetails = itemView.findViewById(R.id.extra_details);
         }
     }
+
 
     @Override
     public RideAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -47,6 +52,18 @@ public class RideAdapter extends RecyclerView.Adapter<RideAdapter.ViewHolder> {
         Ride ride = rideList.get(position);
         holder.driverName.setText(ride.driverName);
         holder.destination.setText(ride.destination);
+        holder.itemView.setOnClickListener(v -> {
+            ride.isExpanded = !ride.isExpanded;
+            notifyItemChanged(holder.getAdapterPosition());
+        });
+
+        holder.driverName.setText(ride.driverName);
+        holder.destination.setText(ride.destination);
+        holder.price.setText("Price: " + ride.price);
+        holder.seats.setText("Seats Available: " + ride.seats);
+
+        holder.extraDetails.setVisibility(ride.isExpanded ? View.VISIBLE : View.GONE);
+
 
         updateRequestButton(holder, ride);
 
