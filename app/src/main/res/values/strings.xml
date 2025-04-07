@@ -5,4 +5,16 @@
     <string name="title_dashboard">Dashboard</string>
     <string name="title_notifications">Notifications</string>
     <string name="title_activity_ride_result_page">RideResultPage</string>
+    <string name="request">Request</string>
+    <string name="requested">Requested</string>
+    <string name="accepted">Accepted</string>
+    <string name="declined">Declined</string>
+    <string name="request_again">Request Again</string>
+    <string name="start_location_hint">Start Location</string>
+    <string name="end_location_hint">End Location</string>
+    <string name="date_hint">Date</string>
+    <string name="time_hint">Time</string>
+    <string name="passenger_label">Number of Passengers</string>
+    <string name="search_button_text">Search for Rides</string>
+    <string name="available_rides_title">Available Rides</string>
 </resources>

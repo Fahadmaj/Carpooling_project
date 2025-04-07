@@ -1,16 +1,22 @@
 package com.example.carpoolingapp;
 
+import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import androidx.recyclerview.widget.RecyclerView;
+
 import java.util.List;
+import java.util.Random;
 
 public class RideAdapter extends RecyclerView.Adapter<RideAdapter.ViewHolder> {
-
     private final List<Ride> rideList;
+    private Random random = new Random();
+    private boolean hasAcceptedRide = false;
 
     public RideAdapter(List<Ride> rideList) {
         this.rideList = rideList;
@@ -41,9 +47,92 @@ public class RideAdapter extends RecyclerView.Adapter<RideAdapter.ViewHolder> {
         Ride ride = rideList.get(position);
         holder.driverName.setText(ride.driverName);
         holder.destination.setText(ride.destination);
+
+        updateRequestButton(holder, ride);
+
         holder.requestButton.setOnClickListener(v -> {
-            //this is the request part, add ur stuff here
+
+            if (ride.status.equals("none")) {
+                // User is requesting a ride
+                ride.status = "requested";
+                updateRequestButton(holder, ride);
+
+                Toast.makeText(holder.itemView.getContext(),
+                        "Ride requested from " + ride.driverName, Toast.LENGTH_SHORT).show();
+
+                new Handler().postDelayed(() -> {
+                    boolean accepted = random.nextInt(10) < 7;
+
+                    if (ride.status.equals("requested")) {
+                        if (accepted) {
+                            ride.status = "accepted";
+
+                            hasAcceptedRide = true;
+                            Toast.makeText(holder.itemView.getContext(),
+                                    ride.driverName + " accepted your ride request!",
+                                    Toast.LENGTH_LONG).show();
+
+                            notifyDataSetChanged();
+                        } else {
+                            ride.status = "declined";
+                            Toast.makeText(holder.itemView.getContext(),
+                                    ride.driverName + " declined your ride request.",
+                                    Toast.LENGTH_LONG).show();
+                        }
+
+                        notifyItemChanged(holder.getAdapterPosition());
+                    }
+                }, 2000 + random.nextInt(3000));
+
+            } else if (ride.status.equals("requested")) {
+                ride.status = "none";
+                updateRequestButton(holder, ride);
+                Toast.makeText(holder.itemView.getContext(),
+                        "Ride request cancelled", Toast.LENGTH_SHORT).show();
+            } else if (ride.status.equals("declined")) {
+                ride.status = "none";
+                updateRequestButton(holder, ride);
+                Toast.makeText(holder.itemView.getContext(),
+                        "You can request again", Toast.LENGTH_SHORT).show();
+            } else if (ride.status.equals("accepted")) {
+                ride.status = "none";
+                hasAcceptedRide = false;
+                notifyDataSetChanged();
+                Toast.makeText(holder.itemView.getContext(),
+                        "Ride cancelled", Toast.LENGTH_SHORT).show();
+            }
         });
+    }
+
+    private void updateRequestButton(ViewHolder holder, Ride ride) {
+        switch (ride.status) {
+            case "none":
+                if (hasAcceptedRide) {
+                    holder.requestButton.setText("Unavailable");
+                    holder.requestButton.setEnabled(false);
+                } else {
+                    holder.requestButton.setText("Request");
+                    holder.requestButton.setEnabled(true);
+                }
+                break;
+            case "requested":
+                holder.requestButton.setText("Cancel Request");
+                holder.requestButton.setEnabled(true);
+                break;
+            case "accepted":
+                holder.requestButton.setText("Cancel Ride");
+                holder.requestButton.setEnabled(true);
+                break;
+            case "declined":
+                if (hasAcceptedRide) {
+                    holder.requestButton.setText("Unavailable");
+                    holder.requestButton.setEnabled(false);
+                } else {
+                    holder.requestButton.setText("Try Again");
+                    holder.requestButton.setEnabled(true);
+                }
+                break;
+        }
     }
 
     @Override
