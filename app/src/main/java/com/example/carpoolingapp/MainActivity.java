@@ -1,9 +1,12 @@
+// MainActivity.java
 package com.example.carpoolingapp;
 
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -12,17 +15,13 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.RawRes;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
-import androidx.navigation.NavController;
-import androidx.navigation.fragment.NavHostFragment;
-import androidx.navigation.ui.AppBarConfiguration;
-import androidx.navigation.ui.NavigationUI;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -46,6 +45,10 @@ public class MainActivity extends AppCompatActivity {
     RideAdapter adapter;
     List<Ride> rides = new ArrayList<>();
     TextView availableRidesTitle;
+    private String selectedDate;
+    private String selectedTime;
+    private String acceptedDriverName;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -56,7 +59,7 @@ public class MainActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
-        // search button stuff
+
         Button searchButton = findViewById(R.id.search_button);
 
         searchButton.setOnClickListener(v -> {
@@ -74,23 +77,33 @@ public class MainActivity extends AppCompatActivity {
                             obj.getString("driverName"),
                             obj.getString("destination"),
                             obj.getString("price"),
-                            obj.getString("seats")
+                            obj.getString("seats"),
+                            obj.optString("date", "N/A"),
+                            obj.optString("time", "N/A")
                     );
                     rides.add(ride);
                 }
                 adapter.notifyDataSetChanged();
             } catch (JSONException e) {
+                Log.e("JSON", "JSON parsing error: " + e.getMessage());
                 e.printStackTrace();
-                Toast.makeText(this, "Failed to load rides", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Failed to parse JSON rides data.", Toast.LENGTH_SHORT).show();
+            } catch (NullPointerException e) {
+                Log.e("JSON", "Null pointer exception during JSON processing: " + e.getMessage());
+                e.printStackTrace();
+                Toast.makeText(this, "Error processing rides data.", Toast.LENGTH_SHORT).show();
+            } catch (Exception e) {
+                Log.e("JSON", "An unexpected error occurred: " + e.getMessage());
+                e.printStackTrace();
+                Toast.makeText(this, "An unexpected error occurred.", Toast.LENGTH_SHORT).show();
             }
         });
 
         rideList = findViewById(R.id.ride_list);
         availableRidesTitle = findViewById(R.id.available_rides_title);
-        adapter = new RideAdapter(rides);
+        adapter = new RideAdapter(rides, this::onRideAccepted);
         rideList.setAdapter(adapter);
         rideList.setLayoutManager(new LinearLayoutManager(this));
-
 
         Spinner passengerSpinner = findViewById(R.id.passenger_spinner);
 
@@ -102,37 +115,30 @@ public class MainActivity extends AppCompatActivity {
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         passengerSpinner.setAdapter(adapter);
 
-        // need this for all activities
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
         bottomNavigationView.setOnNavigationItemSelectedListener(item -> {
             if (item.getItemId() == R.id.nav_home) {
-
                 if (!(getClass().equals(MainActivity.class))) {
-                    // If not, start MainActivity using an Intent
                     Intent intent = new Intent(MainActivity.this, MainActivity.class);
                     startActivity(intent);
                 }
                 return true;
             } else if (item.getItemId() == R.id.nav_chat) {
-                // Check if we're already on MessagePage
                 if (!(getClass().equals(MessagePage.class))) {
-                    // If not, start MessagePage using an Intent
                     Intent intent = new Intent(MainActivity.this, MessagePage.class);
                     startActivity(intent);
                 }
                 return true;
             } else if (item.getItemId() == R.id.nav_settings) {
-                if (!(getClass().equals(SettingPage.class))) {
-                    // If not, start MessagePage using an Intent
-                    Intent intent = new Intent(MainActivity.this, SettingPage.class);
-                    startActivity(intent);
-                }
+                Intent intent = new Intent(MainActivity.this, SettingPage.class);
+                intent.putExtra("acceptedDriver", acceptedDriverName);
+                intent.putExtra("selectedDate", selectedDate);
+                intent.putExtra("selectedTime", selectedTime);
+                startActivity(intent);
                 return true;
             }
-
             return false;
         });
-
 
         dateInput = findViewById(R.id.date_input);
         timeInput = findViewById(R.id.time_input);
@@ -153,8 +159,8 @@ public class MainActivity extends AppCompatActivity {
         DatePickerDialog datePicker = new DatePickerDialog(
                 this,
                 (view, selectedYear, selectedMonth, selectedDay) -> {
-                    String date = selectedDay + "/" + (selectedMonth + 1) + "/" + selectedYear;
-                    dateInput.setText(date);
+                    selectedDate = selectedDay + "/" + (selectedMonth + 1) + "/" + selectedYear;
+                    dateInput.setText(selectedDate);
                 },
                 year, month, day
         );
@@ -169,8 +175,8 @@ public class MainActivity extends AppCompatActivity {
         TimePickerDialog timePicker = new TimePickerDialog(
                 this,
                 (view, selectedHour, selectedMinute) -> {
-                    String time = String.format("%02d:%02d", selectedHour, selectedMinute);
-                    timeInput.setText(time);
+                    selectedTime = String.format("%02d:%02d", selectedHour, selectedMinute);
+                    timeInput.setText(selectedTime);
                 },
                 hour, minute, true
         );
@@ -186,13 +192,28 @@ public class MainActivity extends AppCompatActivity {
             is.read(buffer);
             is.close();
             json = new String(buffer, StandardCharsets.UTF_8);
+            Log.d("JSON", "Loaded JSON: " + json);
         } catch (IOException ex) {
             ex.printStackTrace();
         }
         return json;
     }
 
+    public void onRideAccepted(String driverName) {
+        acceptedDriverName = driverName;
+        showAcceptedDialog();
+    }
 
-
-
+    private void showAcceptedDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage("Go to feedback page to review driver.")
+                .setCancelable(false)
+                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        // No action needed, dialog closes
+                    }
+                });
+        AlertDialog alert = builder.create();
+        alert.show();
+    }
 }
