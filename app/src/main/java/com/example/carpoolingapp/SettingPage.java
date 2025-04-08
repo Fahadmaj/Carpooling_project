@@ -70,8 +70,9 @@ public class SettingPage extends AppCompatActivity {
                 }
                 return true;
             } else if (item.getItemId() == R.id.nav_chat) {
-                if (!(getClass().equals(MessagePage.class))) {
-                    startActivity(new Intent(this, MessagePage.class));
+                if (!(getClass().equals(InboxPage.class))) {
+                    Intent intent = new Intent(SettingPage.this, InboxPage.class);
+                    startActivity(intent);
                 }
                 return true;
             } else if (item.getItemId() == R.id.nav_settings) {

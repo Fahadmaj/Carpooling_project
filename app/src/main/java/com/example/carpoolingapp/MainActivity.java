@@ -200,12 +200,13 @@ public class MainActivity extends AppCompatActivity {
                 }
                 return true;
             } else if (item.getItemId() == R.id.nav_chat) {
-                if (!(getClass().equals(MessagePage.class))) {
-                    Intent intent = new Intent(MainActivity.this, MessagePage.class);
-                    startActivity(intent);
-                }
-                return true;
-            } else if (item.getItemId() == R.id.nav_settings) {
+            if (!(getClass().equals(InboxPage.class))) {
+                Intent intent = new Intent(MainActivity.this, InboxPage.class);
+                startActivity(intent);
+            }
+            return true;
+        }
+        else if (item.getItemId() == R.id.nav_settings) {
                 Intent intent = new Intent(MainActivity.this, SettingPage.class);
                 intent.putExtra("acceptedDriver", acceptedDriverName);
                 intent.putExtra("selectedDate", selectedDate);
