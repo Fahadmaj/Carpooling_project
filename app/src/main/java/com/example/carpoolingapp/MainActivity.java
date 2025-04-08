@@ -77,7 +77,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         if (!Places.isInitialized()) {
-            Places.initialize(getApplicationContext(), "AIzaSyC6RCQmqWMR6KYroeXNBTRSENKMgBZTN1g");
+            Places.initialize(getApplicationContext(), "replace_key");
         }
 
         Button searchButton = findViewById(R.id.search_button);
