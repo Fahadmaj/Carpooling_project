@@ -21,6 +21,8 @@
         <activity
             android:name=".TripDetailActivity"
             android:exported="false" />
+        <activity android:name=".ChatListActivity" />
+
         <activity
             android:name=".SettingPage"
             android:exported="false" />
