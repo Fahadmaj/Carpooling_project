@@ -16,6 +16,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.Nullable;
 import androidx.annotation.RawRes;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -25,16 +26,28 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.gms.common.api.Status;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.libraries.places.api.Places;
+import com.google.android.libraries.places.api.model.Place;
+import com.google.android.libraries.places.api.model.RectangularBounds;
+import com.google.android.libraries.places.widget.Autocomplete;
+import com.google.android.libraries.places.widget.AutocompleteActivity;
+import com.google.android.libraries.places.widget.model.AutocompleteActivityMode;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
 
@@ -49,6 +62,9 @@ public class MainActivity extends AppCompatActivity {
     private String selectedTime;
     private String acceptedDriverName;
 
+    EditText startInput;
+    EditText endInput;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -60,6 +76,10 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
 
+        if (!Places.isInitialized()) {
+            Places.initialize(getApplicationContext(), "AIzaSyC6RCQmqWMR6KYroeXNBTRSENKMgBZTN1g");
+        }
+
         Button searchButton = findViewById(R.id.search_button);
 
         searchButton.setOnClickListener(v -> {
@@ -69,6 +89,65 @@ public class MainActivity extends AppCompatActivity {
 
             rides.clear();
 
+            String start = startInput.getText().toString();
+            String end = endInput.getText().toString();
+            String passengers = ((Spinner) findViewById(R.id.passenger_spinner)).getSelectedItem().toString();
+            String date = dateInput.getText().toString();
+            String time = timeInput.getText().toString();
+
+            if (start.isEmpty() || end.isEmpty()) {
+                Toast.makeText(this, "Please enter start and end locations.", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            double randomPrice = 10 + Math.random() * 15;
+            String price = String.format("%.2f$", randomPrice);
+            String[] drivers = {
+                    "Daniel Miller",
+                    "Emma Johnson",
+                    "Liam Thompson",
+                    "Sophia Roberts",
+                    "Ethan Brown",
+                    "Olivia Davis"
+            };
+            String randomDriver = drivers[(int)(Math.random() * drivers.length)];
+
+
+            String destinationFormatted = end;
+
+
+            Ride customRide = new Ride(
+                    randomDriver,
+                    destinationFormatted,
+                    price,
+                    passengers,
+                    date.isEmpty() ? "N/A" : date,
+                    time.isEmpty() ? "N/A" : time
+            );
+
+            rides.add(customRide);
+            saveRideToInternalStorage(customRide);
+
+            JSONArray customRidesArray = loadCustomRidesFromStorage();
+            for (int i = 0; i < customRidesArray.length(); i++) {
+                JSONObject obj = null;
+                try {
+                    obj = customRidesArray.getJSONObject(i);
+                    Ride ride = new Ride(
+                            obj.getString("driverName"),
+                            obj.getString("destination"),
+                            obj.getString("price"),
+                            obj.getString("seats"),
+                            obj.optString("date", "N/A"),
+                            obj.optString("time", "N/A")
+                    );
+                    rides.add(ride);
+                } catch (JSONException e) {
+                    throw new RuntimeException(e);
+                }
+
+
+            }
             try {
                 JSONArray jsonArray = new JSONArray(loadJSONFromRawResource(R.raw.rides));
                 for (int i = 0; i < jsonArray.length(); i++) {
@@ -88,16 +167,13 @@ public class MainActivity extends AppCompatActivity {
                 Log.e("JSON", "JSON parsing error: " + e.getMessage());
                 e.printStackTrace();
                 Toast.makeText(this, "Failed to parse JSON rides data.", Toast.LENGTH_SHORT).show();
-            } catch (NullPointerException e) {
-                Log.e("JSON", "Null pointer exception during JSON processing: " + e.getMessage());
-                e.printStackTrace();
-                Toast.makeText(this, "Error processing rides data.", Toast.LENGTH_SHORT).show();
             } catch (Exception e) {
-                Log.e("JSON", "An unexpected error occurred: " + e.getMessage());
+                Log.e("JSON", "Unexpected error: " + e.getMessage());
                 e.printStackTrace();
-                Toast.makeText(this, "An unexpected error occurred.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Unexpected error occurred.", Toast.LENGTH_SHORT).show();
             }
         });
+
 
         rideList = findViewById(R.id.ride_list);
         availableRidesTitle = findViewById(R.id.available_rides_title);
@@ -148,6 +224,54 @@ public class MainActivity extends AppCompatActivity {
 
         dateInput.setOnClickListener(v -> showDatePicker());
         timeInput.setOnClickListener(v -> showTimePicker());
+
+        startInput = findViewById(R.id.start_location_input);
+        endInput = findViewById(R.id.end_location_input);
+
+        startInput.setFocusable(false);
+        endInput.setFocusable(false);
+
+        startInput.setOnClickListener(v -> launchAutocomplete(1001));
+        endInput.setOnClickListener(v -> launchAutocomplete(1002));
+    }
+
+    private void launchAutocomplete(int requestCode) {
+        List<Place.Field> fields = Arrays.asList(
+                Place.Field.ID,
+                Place.Field.NAME,
+                Place.Field.ADDRESS
+        );
+
+        // limit stuff to Kelowna
+        RectangularBounds kelownaBounds = RectangularBounds.newInstance(
+                new LatLng(49.8370, -119.6234),
+                new LatLng(49.9500, -119.3320)
+        );
+
+        Intent intent = new Autocomplete.IntentBuilder(AutocompleteActivityMode.OVERLAY, fields)
+                .setLocationBias(kelownaBounds)
+                .setCountries(Arrays.asList("CA"))
+                .build(this);
+
+        startActivityForResult(intent, requestCode);
+    }
+
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if ((requestCode == 1001 || requestCode == 1002) && resultCode == RESULT_OK && data != null) {
+            Place place = Autocomplete.getPlaceFromIntent(data);
+            if (requestCode == 1001) {
+                startInput.setText(place.getAddress());
+            } else {
+                endInput.setText(place.getAddress());
+            }
+        } else if (resultCode == AutocompleteActivity.RESULT_ERROR) {
+            Status status = Autocomplete.getStatusFromIntent(data);
+            Toast.makeText(this, "Error: " + status.getStatusMessage(), Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void showDatePicker() {
@@ -216,4 +340,59 @@ public class MainActivity extends AppCompatActivity {
         AlertDialog alert = builder.create();
         alert.show();
     }
+    private void saveRideToInternalStorage(Ride ride) {
+        try {
+            File file = new File(getFilesDir(), "rides_custom.json");
+            JSONArray ridesArray;
+
+            if (file.exists()) {
+                FileInputStream fis = new FileInputStream(file);
+                byte[] data = new byte[(int) file.length()];
+                fis.read(data);
+                fis.close();
+                String content = new String(data, StandardCharsets.UTF_8);
+                ridesArray = new JSONArray(content);
+            } else {
+                ridesArray = new JSONArray();
+            }
+
+            JSONObject newRide = new JSONObject();
+            newRide.put("driverName", ride.driverName);
+            newRide.put("destination", ride.destination);
+            newRide.put("price", ride.price);
+            newRide.put("seats", ride.seats);
+            newRide.put("date", ride.date);
+            newRide.put("time", ride.time);
+
+            ridesArray.put(newRide);
+
+            FileOutputStream fos = new FileOutputStream(file);
+            fos.write(ridesArray.toString().getBytes(StandardCharsets.UTF_8));
+            fos.close();
+
+        } catch (Exception e) {
+            Log.e("SAVE_RIDE", "Failed to save custom ride: " + e.getMessage());
+        }
+    }
+    //Use this to get the custom driver
+    private JSONArray loadCustomRidesFromStorage() {
+        try {
+            File file = new File(getFilesDir(), "rides_custom.json");
+            if (!file.exists()) return new JSONArray();
+
+            FileInputStream fis = new FileInputStream(file);
+            byte[] data = new byte[(int) file.length()];
+            fis.read(data);
+            fis.close();
+
+            String content = new String(data, StandardCharsets.UTF_8);
+            return new JSONArray(content);
+        } catch (Exception e) {
+            Log.e("LOAD_CUSTOM", "Error reading custom rides: " + e.getMessage());
+            return new JSONArray();
+        }
+    }
+
+
+
 }
