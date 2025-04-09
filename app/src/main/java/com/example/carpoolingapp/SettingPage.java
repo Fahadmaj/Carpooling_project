@@ -1,4 +1,3 @@
-// SettingPage.java
 package com.example.carpoolingapp;
 
 import android.content.Intent;
@@ -66,12 +65,16 @@ public class SettingPage extends AppCompatActivity {
         bottomNavigationView.setOnNavigationItemSelectedListener(item -> {
             if (item.getItemId() == R.id.nav_home) {
                 if (!(getClass().equals(MainActivity.class))) {
-                    startActivity(new Intent(this, MainActivity.class));
+                    Intent intent = new Intent(SettingPage.this, MainActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                    startActivity(intent);
                 }
                 return true;
             } else if (item.getItemId() == R.id.nav_chat) {
                 if (!(getClass().equals(MessagePage.class))) {
-                    startActivity(new Intent(this, MessagePage.class));
+                    Intent intent = new Intent(SettingPage.this, MessagePage.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                    startActivity(intent);
                 }
                 return true;
             } else if (item.getItemId() == R.id.nav_settings) {

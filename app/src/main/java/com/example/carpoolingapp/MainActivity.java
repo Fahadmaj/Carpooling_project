@@ -1,4 +1,3 @@
-// MainActivity.java
 package com.example.carpoolingapp;
 
 import android.app.DatePickerDialog;
@@ -194,14 +193,11 @@ public class MainActivity extends AppCompatActivity {
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
         bottomNavigationView.setOnNavigationItemSelectedListener(item -> {
             if (item.getItemId() == R.id.nav_home) {
-                if (!(getClass().equals(MainActivity.class))) {
-                    Intent intent = new Intent(MainActivity.this, MainActivity.class);
-                    startActivity(intent);
-                }
                 return true;
             } else if (item.getItemId() == R.id.nav_chat) {
                 if (!(getClass().equals(MessagePage.class))) {
                     Intent intent = new Intent(MainActivity.this, MessagePage.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
                     startActivity(intent);
                 }
                 return true;
@@ -210,6 +206,7 @@ public class MainActivity extends AppCompatActivity {
                 intent.putExtra("acceptedDriver", acceptedDriverName);
                 intent.putExtra("selectedDate", selectedDate);
                 intent.putExtra("selectedTime", selectedTime);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
                 startActivity(intent);
                 return true;
             }
@@ -392,7 +389,4 @@ public class MainActivity extends AppCompatActivity {
             return new JSONArray();
         }
     }
-
-
-
 }
