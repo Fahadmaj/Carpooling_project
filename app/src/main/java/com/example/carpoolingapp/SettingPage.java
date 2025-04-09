@@ -85,41 +85,22 @@ public class SettingPage extends AppCompatActivity {
     }
 
     private void loadAcceptedTripFromJson() {
-        try {
-            InputStream is = getResources().openRawResource(R.raw.rides);
-            Scanner scanner = new Scanner(is).useDelimiter("\\A");
-            String json = scanner.hasNext() ? scanner.next() : "";
-            scanner.close();
+        if (acceptedDriver != null && !acceptedDriver.isEmpty())  {
+            Trip trip = new Trip(
+                    "Your destination",
+                    15.99,
+                    acceptedDriver,
+                    selectedDate != null ? selectedDate : "N/A",
+                    selectedTime != null ? selectedTime : "N/A"
+            );
+            tripList.add(trip);
 
-            JSONArray tripArray = new JSONArray(json);
-            for (int i = 0; i < tripArray.length(); i++) {
-                JSONObject obj = tripArray.getJSONObject(i);
-                if (obj.getString("driverName").equals(acceptedDriver)) {
-                    Trip trip = new Trip(
-                            obj.getString("destination"),
-                            Double.parseDouble(obj.getString("price").replace("$", "")),
-                            obj.getString("driverName"),
-                            selectedDate,
-                            selectedTime
-                    );
-                    tripList.add(trip);
-                    break;
-                }
-            }
-
-            if (tripList.isEmpty()) {
-                emptyTextView.setVisibility(View.VISIBLE);
-                tripRecyclerView.setVisibility(View.GONE);
-            } else {
-                emptyTextView.setVisibility(View.GONE);
-                tripRecyclerView.setVisibility(View.VISIBLE);
-                adapter.updateTrips(tripList);
-            }
-
-        } catch (JSONException | NullPointerException e) {
-            e.printStackTrace();
+            emptyTextView.setVisibility(View.GONE);
+            tripRecyclerView.setVisibility(View.VISIBLE);
+            adapter.updateTrips(tripList);
+        } else {
             emptyTextView.setVisibility(View.VISIBLE);
-            emptyTextView.setText("Error loading trips.");
+            tripRecyclerView.setVisibility(View.GONE);
         }
     }
 }
