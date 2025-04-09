@@ -57,31 +57,25 @@ public class MessagePage extends AppCompatActivity {
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
         bottomNavigationView.setOnNavigationItemSelectedListener(item -> {
             if (item.getItemId() == R.id.nav_home) {
-
                 if (!(getClass().equals(MainActivity.class))) {
-                    // If not, start MainActivity using an Intent
                     Intent intent = new Intent(MessagePage.this, MainActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
                     startActivity(intent);
                 }
                 return true;
             } else if (item.getItemId() == R.id.nav_chat) {
-                // Check if we're already on MessagePage
-                if (!(getClass().equals(MessagePage.class))) {
-                    // If not, start MessagePage using an Intent
-                    Intent intent = new Intent(MessagePage.this, MessagePage.class);
-                    startActivity(intent);
-                }
                 return true;
             } else if (item.getItemId() == R.id.nav_settings) {
                 if (!(getClass().equals(SettingPage.class))) {
-                    // If not, start MessagePage using an Intent
                     Intent intent = new Intent(MessagePage.this, SettingPage.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
                     startActivity(intent);
                 }
                 return true;
             }
             return false;
         });
+
         recyclerViewMessages = findViewById(R.id.recyclerViewMessages);
         editTextMessage = findViewById(R.id.editTextText);
         buttonSend = findViewById(R.id.sendButton);
