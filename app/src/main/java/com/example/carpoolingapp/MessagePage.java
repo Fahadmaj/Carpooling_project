@@ -6,6 +6,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -29,6 +30,12 @@ import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -40,6 +47,7 @@ public class MessagePage extends AppCompatActivity {
     private FirebaseFirestore db;
     private ArrayList<Message> messageList;
     private MessageAdapter messageAdapter;
+    String acceptedDriver;
 
 
     @Override
@@ -87,47 +95,56 @@ public class MessagePage extends AppCompatActivity {
         recyclerViewMessages.setLayoutManager(new LinearLayoutManager(this));
         recyclerViewMessages.setAdapter(messageAdapter);
 
-        db.collection("messages")
-                .orderBy("timestamp", Query.Direction.ASCENDING)
-                .addSnapshotListener(new EventListener<QuerySnapshot>() {
-                    @Override
-                    public void onEvent(QuerySnapshot snapshots, FirebaseFirestoreException e) {
-                        if (e != null) {
-                            return;
-                        }
+        acceptedDriver = getIntent().getStringExtra("acceptedDriver");
+        if (acceptedDriver == null || acceptedDriver.isEmpty() || acceptedDriver.isBlank()) {
+            Toast.makeText(this, "No active trip. Please start a trip before chat", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(MessagePage.this, MainActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            startActivity(intent);
+        }else{
+            db.collection(acceptedDriver)
+                    .orderBy("timestamp", Query.Direction.ASCENDING)
+                    .addSnapshotListener(new EventListener<QuerySnapshot>() {
+                        @Override
+                        public void onEvent(QuerySnapshot snapshots, FirebaseFirestoreException e) {
+                            if (e != null) {
+                                return;
+                            }
 
-                        messageList.clear();
-                        for (DocumentSnapshot doc : snapshots) {
-                            Message message = doc.toObject(Message.class);
-                            messageList.add(message);
+                            messageList.clear();
+                            for (DocumentSnapshot doc : snapshots) {
+                                Message message = doc.toObject(Message.class);
+                                messageList.add(message);
+                            }
+                            messageAdapter.notifyDataSetChanged();
+                            recyclerViewMessages.scrollToPosition(messageList.size() - 1);
                         }
-                        messageAdapter.notifyDataSetChanged();
-                        recyclerViewMessages.scrollToPosition(messageList.size() - 1);
+                    });
+
+            // Send a message
+            buttonSend.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    String messageText = editTextMessage.getText().toString().trim();
+                    if (!messageText.isEmpty()) {
+                        sendMessage(messageText);
+                        editTextMessage.setText("");
                     }
-                });
-
-        // Send a message
-        buttonSend.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String messageText = editTextMessage.getText().toString().trim();
-                if (!messageText.isEmpty()) {
-                    sendMessage(messageText);
-                    editTextMessage.setText("");
                 }
-            }
-        });
+            });
+        }
     }
 
 
     private void sendMessage(String text) {
-        String sender = "You"; // todo replace with actual user information
+        String sender = "You";
         Date timestamp = new Date();
 
         Message message = new Message(sender, text, timestamp);
 
-        db.collection("messages").add(message)
+        db.collection(acceptedDriver).add(message)
                 .addOnSuccessListener(documentReference -> {
+                    db.collection(acceptedDriver).add(new Message(acceptedDriver,"ok",new Date()));
                 })
                 .addOnFailureListener(e -> {
                 });

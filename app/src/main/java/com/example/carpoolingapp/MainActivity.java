@@ -197,6 +197,7 @@ public class MainActivity extends AppCompatActivity {
             } else if (item.getItemId() == R.id.nav_chat) {
                 if (!(getClass().equals(MessagePage.class))) {
                     Intent intent = new Intent(MainActivity.this, MessagePage.class);
+                    intent.putExtra("acceptedDriver", acceptedDriverName);
                     intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
                     startActivity(intent);
                 }
