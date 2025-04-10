@@ -262,20 +262,31 @@ public class MainActivity extends AppCompatActivity {
         acceptedDriverName = driverName;
         showAcceptedDialog();
 
-        // Start a timer that ends the trip after 5 seconds
+        // Start a timer that ends the trip after 10 seconds
         new android.os.Handler().postDelayed(() -> {
             Toast.makeText(this, "Trip completed! You can now leave a review.", Toast.LENGTH_LONG).show();
 
-            // Optional: Navigate to trip history or review screen directly
-            Intent intent = new Intent(MainActivity.this, SettingPage.class); // Trip History page
+
+
+            // Navigate to trip history
+            Intent intent = new Intent(MainActivity.this, SettingPage.class);
             intent.putExtra("acceptedDriver", acceptedDriverName);
             intent.putExtra("selectedDate", selectedDate);
             intent.putExtra("selectedTime", selectedTime);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
             startActivity(intent);
 
-        }, 10000); // 10 seconds = 10000 milliseconds
+            // Reset UI fields
+            startInput.setText("");
+            endInput.setText("");
+            dateInput.setText("");
+            timeInput.setText("");
+            rides.clear();
+            adapter.notifyDataSetChanged();
+
+        }, 10000); // 10 seconds
     }
+
 
 
     private void showAcceptedDialog() {
