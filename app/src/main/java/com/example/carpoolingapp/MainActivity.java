@@ -284,6 +284,7 @@ public class MainActivity extends AppCompatActivity {
             rides.clear();
             adapter.notifyDataSetChanged();
 
+
         }, 10000); // 10 seconds
     }
 
