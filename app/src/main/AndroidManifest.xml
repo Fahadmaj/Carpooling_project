@@ -16,8 +16,8 @@
         tools:targetApi="31">
 
         <meta-data
-            android:name="com.google.android.geo.api_key"
-            android:value="AIzaSyCp-DLVYzlOUamVxYF0FB523ZmiBS48f88" />
+            android:name="com.google.android.geo.API_KEY"
+            android:value="replace_key" />
         <activity
             android:name=".TripDetailActivity"
             android:exported="false" />

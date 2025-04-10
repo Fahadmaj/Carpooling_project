@@ -77,7 +77,7 @@ public class MainActivity extends AppCompatActivity {
 //        clearCustomRidesFile();
 
         if (!Places.isInitialized()) {
-            Places.initialize(getApplicationContext(), "api_key");
+            Places.initialize(getApplicationContext(), "replace_key");
         }
 
         Button searchButton = findViewById(R.id.search_button);
