@@ -14,9 +14,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 public class TripHistoryActivity extends AppCompatActivity {
 
@@ -36,7 +35,7 @@ public class TripHistoryActivity extends AppCompatActivity {
         tripRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         adapter = new TripHistoryAdapter(tripList, trip -> {
             Intent intent = new Intent(TripHistoryActivity.this, TripDetailActivity.class);
-            intent.putExtra("trip", trip); // ✅ Trip now implements Serializable
+            intent.putExtra("trip", trip);
             startActivity(intent);
         });
         tripRecyclerView.setAdapter(adapter);
@@ -59,10 +58,13 @@ public class TripHistoryActivity extends AppCompatActivity {
                         obj.getDouble("price"),
                         obj.getString("driver"),
                         obj.getString("date"),
-                        obj.getString("time")
+                        obj.getString("time"),
+                        obj.optString("tripId", generateFallbackId(obj))
                 );
                 tripList.add(trip);
             }
+
+            sortTripsByDateTimeDesc(tripList);
 
             if (tripList.isEmpty()) {
                 emptyTextView.setVisibility(View.VISIBLE);
@@ -77,6 +79,27 @@ public class TripHistoryActivity extends AppCompatActivity {
             e.printStackTrace();
             emptyTextView.setVisibility(View.VISIBLE);
             emptyTextView.setText("Error loading trips.");
+        }
+    }
+
+    private void sortTripsByDateTimeDesc(List<Trip> trips) {
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
+        trips.sort((t1, t2) -> {
+            try {
+                Date d1 = sdf.parse(t1.getDate() + " " + t1.getTime());
+                Date d2 = sdf.parse(t2.getDate() + " " + t2.getTime());
+                return d2.compareTo(d1); // Newest first
+            } catch (Exception e) {
+                return 0;
+            }
+        });
+    }
+
+    private String generateFallbackId(JSONObject obj) {
+        try {
+            return obj.getString("driver") + "_" + obj.getString("date") + "_" + obj.getString("time");
+        } catch (JSONException e) {
+            return String.valueOf(System.currentTimeMillis());
         }
     }
 }

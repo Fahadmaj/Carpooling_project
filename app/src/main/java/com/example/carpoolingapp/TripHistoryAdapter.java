@@ -57,7 +57,14 @@ public class TripHistoryAdapter extends RecyclerView.Adapter<TripHistoryAdapter.
         public void bind(final Trip trip) {
             destinationText.setText(trip.getDestination());
             priceText.setText(String.format("$%.2f", trip.getPrice()));
-            driverText.setText(trip.getDriver());
+
+            double avgRating = ReviewUtils.getAverageRating(itemView.getContext(), trip.getDriver());
+            String displayName = trip.getDriver();
+            if (avgRating > 0) {
+                displayName += String.format(" (%.1f★)", avgRating);
+            }
+
+            driverText.setText(displayName);
             dateText.setText(trip.getDate());
             timeText.setText(trip.getTime());
 
