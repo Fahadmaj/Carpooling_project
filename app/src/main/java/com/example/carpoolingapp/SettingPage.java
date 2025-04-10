@@ -17,16 +17,14 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONException;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 public class SettingPage extends AppCompatActivity {
 
@@ -34,9 +32,6 @@ public class SettingPage extends AppCompatActivity {
     private TripHistoryAdapter adapter;
     private TextView emptyTextView;
     private List<Trip> tripList = new ArrayList<>();
-    private String acceptedDriver;
-    private String selectedDate;
-    private String selectedTime;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,6 +47,7 @@ public class SettingPage extends AppCompatActivity {
         tripRecyclerView = findViewById(R.id.tripRecyclerView);
         emptyTextView = findViewById(R.id.emptyTextView);
         tripRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+
         adapter = new TripHistoryAdapter(tripList, trip -> {
             Intent intent = new Intent(SettingPage.this, TripDetailActivity.class);
             intent.putExtra("trip", trip);
@@ -59,11 +55,7 @@ public class SettingPage extends AppCompatActivity {
         });
         tripRecyclerView.setAdapter(adapter);
 
-        acceptedDriver = getIntent().getStringExtra("acceptedDriver");
-        selectedDate = getIntent().getStringExtra("selectedDate");
-        selectedTime = getIntent().getStringExtra("selectedTime");
-
-        loadAcceptedTripFromJson();
+        loadAllSavedTrips();
 
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
         bottomNavigationView.setOnNavigationItemSelectedListener(item -> {
@@ -88,89 +80,14 @@ public class SettingPage extends AppCompatActivity {
         });
     }
 
-    private void loadAcceptedTripFromJson() {
-        try {
-            // First check if we have a valid driver name
-            if (acceptedDriver != null && !acceptedDriver.isEmpty()) {
-                // Try to find the driver in the internal storage file
-                File file = new File(getFilesDir(), "rides_custom.json");
-                if (file.exists()) {
-                    FileInputStream fis = new FileInputStream(file);
-                    byte[] data = new byte[(int) file.length()];
-                    fis.read(data);
-                    fis.close();
-
-                    String content = new String(data, StandardCharsets.UTF_8);
-                    JSONArray customRidesArray = new JSONArray(content);
-
-                    for (int i = 0; i < customRidesArray.length(); i++) {
-                        JSONObject obj = customRidesArray.getJSONObject(i);
-                        if (obj.getString("driverName").equals(acceptedDriver)) {
-                            Trip trip = new Trip(
-                                    obj.getString("destination"),
-                                    Double.parseDouble(obj.getString("price").replace("$", "")),
-                                    obj.getString("driverName"),
-                                    obj.optString("date", "N/A"),
-                                    obj.optString("time", "N/A")
-                            );
-                            tripList.add(trip);
-                            break;
-                        }
-                    }
-                }
-
-                // If we didn't find the driver in internal storage or there's no trip yet,
-                // create a default trip with the driver info we have
-                if (tripList.isEmpty()) {
-                    Trip trip = new Trip(
-                            "Your destination",
-                            15.99,
-                            acceptedDriver,
-                            selectedDate != null ? selectedDate : "N/A",
-                            selectedTime != null ? selectedTime : "N/A"
-                    );
-                    tripList.add(trip);
-                }
-
-                emptyTextView.setVisibility(View.GONE);
-                tripRecyclerView.setVisibility(View.VISIBLE);
-                adapter.updateTrips(tripList);
-            } else {
-                // No accepted driver
-                emptyTextView.setVisibility(View.VISIBLE);
-                tripRecyclerView.setVisibility(View.GONE);
-            }
-        } catch (Exception e) {
-            Log.e("SETTING_PAGE", "Error loading trip: " + e.getMessage());
-            e.printStackTrace();
-
-            // If there's an error, still try to show something if we have a driver name
-            if (acceptedDriver != null && !acceptedDriver.isEmpty() && tripList.isEmpty()) {
-                Trip trip = new Trip(
-                        "Your destination",
-                        15.99,
-                        acceptedDriver,
-                        selectedDate != null ? selectedDate : "N/A",
-                        selectedTime != null ? selectedTime : "N/A"
-                );
-                tripList.add(trip);
-
-                emptyTextView.setVisibility(View.GONE);
-                tripRecyclerView.setVisibility(View.VISIBLE);
-                adapter.updateTrips(tripList);
-            } else {
-                emptyTextView.setVisibility(View.VISIBLE);
-                emptyTextView.setText("Error loading trips: " + e.getMessage());
-                tripRecyclerView.setVisibility(View.GONE);
-            }
-        }
-    }
-
-    // Method to load custom rides from internal storage
-    private JSONArray loadCustomRidesFromStorage() {
+    private void loadAllSavedTrips() {
         try {
             File file = new File(getFilesDir(), "rides_custom.json");
-            if (!file.exists()) return new JSONArray();
+            if (!file.exists()) {
+                emptyTextView.setVisibility(View.VISIBLE);
+                tripRecyclerView.setVisibility(View.GONE);
+                return;
+            }
 
             FileInputStream fis = new FileInputStream(file);
             byte[] data = new byte[(int) file.length()];
@@ -178,10 +95,59 @@ public class SettingPage extends AppCompatActivity {
             fis.close();
 
             String content = new String(data, StandardCharsets.UTF_8);
-            return new JSONArray(content);
+            JSONArray array = new JSONArray(content);
+
+            for (int i = 0; i < array.length(); i++) {
+                JSONObject obj = array.getJSONObject(i);
+                Trip trip = new Trip(
+                        obj.getString("destination"),
+                        Double.parseDouble(obj.getString("price").replace("$", "")),
+                        obj.getString("driverName"),
+                        obj.optString("date", "N/A"),
+                        obj.optString("time", "N/A"),
+                        obj.optString("tripId", generateFallbackId(obj))
+                );
+                tripList.add(trip);
+            }
+
+            sortTripsByDateTimeDesc(tripList);
+
+            if (tripList.isEmpty()) {
+                emptyTextView.setVisibility(View.VISIBLE);
+                tripRecyclerView.setVisibility(View.GONE);
+            } else {
+                emptyTextView.setVisibility(View.GONE);
+                tripRecyclerView.setVisibility(View.VISIBLE);
+                adapter.updateTrips(tripList);
+            }
+
         } catch (Exception e) {
-            Log.e("LOAD_CUSTOM", "Error reading custom rides: " + e.getMessage());
-            return new JSONArray();
+            Log.e("SETTING_PAGE", "Error reading rides_custom.json: " + e.getMessage());
+            e.printStackTrace();
+            emptyTextView.setVisibility(View.VISIBLE);
+            emptyTextView.setText("Error loading trips.");
+            tripRecyclerView.setVisibility(View.GONE);
+        }
+    }
+
+    private void sortTripsByDateTimeDesc(List<Trip> trips) {
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
+        trips.sort((t1, t2) -> {
+            try {
+                Date d1 = sdf.parse(t1.getDate() + " " + t1.getTime());
+                Date d2 = sdf.parse(t2.getDate() + " " + t2.getTime());
+                return d2.compareTo(d1); // Newest first
+            } catch (Exception e) {
+                return 0;
+            }
+        });
+    }
+
+    private String generateFallbackId(JSONObject obj) {
+        try {
+            return obj.getString("driverName") + "_" + obj.optString("date", "N/A") + "_" + obj.optString("time", "N/A");
+        } catch (JSONException e) {
+            return String.valueOf(System.currentTimeMillis());
         }
     }
 }

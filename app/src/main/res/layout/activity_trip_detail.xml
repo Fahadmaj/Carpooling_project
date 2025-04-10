@@ -46,10 +46,14 @@
             android:text="Time"
             android:layout_marginBottom="16dp" />
 
+        <!-- Rate Label -->
         <TextView
+            android:id="@+id/rateLabel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Rate the driver" />
+            android:text="Rate the driver"
+            android:textSize="16sp"
+            android:layout_marginBottom="8dp" />
 
         <RatingBar
             android:id="@+id/ratingBar"
@@ -57,7 +61,7 @@
             android:layout_height="wrap_content"
             android:numStars="5"
             android:stepSize="1"
-            android:layout_marginBottom="16dp"/>
+            android:layout_marginBottom="16dp" />
 
         <EditText
             android:id="@+id/commentEditText"
@@ -66,14 +70,14 @@
             android:hint="Leave a comment"
             android:minHeight="100dp"
             android:gravity="top"
-            android:layout_marginBottom="16dp"/>
+            android:layout_marginBottom="16dp" />
 
         <Button
             android:id="@+id/reportButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Report Trip (Auto 1-star)"
-            android:layout_marginBottom="16dp"/>
+            android:layout_marginBottom="16dp" />
 
         <Button
             android:id="@+id/submitReviewButton"
@@ -85,7 +89,20 @@
             android:id="@+id/backButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Back" />
+            android:text="Back"
+            android:layout_marginTop="12dp" />
+
+        <!-- Thank You Message (initially hidden) -->
+        <TextView
+            android:id="@+id/thankYouText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Thanks for rating the trip!"
+            android:textStyle="bold"
+            android:textColor="#4CAF50"
+            android:textSize="18sp"
+            android:layout_marginTop="20dp"
+            android:visibility="gone" />
 
     </LinearLayout>
 </ScrollView>

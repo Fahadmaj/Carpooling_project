@@ -17,7 +17,7 @@
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="replace_key" />
+            android:value="key" />
         <activity
             android:name=".TripDetailActivity"
             android:exported="false" />
